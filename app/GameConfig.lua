@@ -61,6 +61,7 @@ GameConfig.lifeUpScore = {50000, 100000, 150000, 200000, 250000, 300000}
 GameConfig.container = {
     enemies = {},
     enemyBullets = {},
+    playerBullets = {},
     explosions = {},
     sparks = {},
     hits = {},
