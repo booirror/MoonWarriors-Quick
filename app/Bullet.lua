@@ -88,6 +88,14 @@ function Bullet:show(parent, speed, type, attackMode, zorder, mode)
     return bullet
 end
 
+function Bullet:showByShip()
+    self:show(parent, GameConfig.bulletSpeed.ship, "W1.png", GameConfig.enemyAttackMode.normal, 3000, GameConfig.unitTag.playerBullet)
+end
+
+function Bullet:showByEnemy()
+    self:show(parent, GameConfig.bulletSpeed.ship, "W2.png", GameConfig.enemyAttackMode.normal, 3000, GameConfig.unitTag.enemyBullet)
+end
+
 function Bullet:create(parent, speed, type, attackMode, zorder, mode)
     local b = self.new(speed, type, attackMode)
     b:activate()
