@@ -13,6 +13,7 @@ function Explosion:ctor()
     self.tmpWidth = sz.width
     self.tmpHeight = sz.height
     self.animation = display.getAnimationCache("Explosion")
+    self:setBlendFunc(gl.SRC_ALPHA, gl.ONE)
 end
 
 function Explosion:play()
@@ -30,7 +31,7 @@ end
 function Explosion:sharedExplosion()
     local frames = display.newFrames("explosion_%02d.png", 1, 35)
     local anim = display.newAnimation(frames, 0.04)
-    display.setAnimationCache("Explsion", animation)
+    display.setAnimationCache("Explosion", anim)
 end
 
 function Explosion:activate()
@@ -52,7 +53,7 @@ end
 function Explosion:show(parent)
     local exp = self:getAvailible()
     if exp == nil then
-        local exp = Explosion:create(parent)
+        exp = self:create(parent)
     end
     exp:activate()
     exp:play()
@@ -61,7 +62,7 @@ end
 
 function Explosion:create(parent)
     local exp = self.new()
-    assert(false, "add child")
+    parent:addExplosions(exp)
     table.insert(GameConfig.container.explosions, exp)
     return exp
 end

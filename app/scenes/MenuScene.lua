@@ -45,6 +45,7 @@ function MenuScene:init()
     local newGame = cc.MenuItemSprite:create(newGameNormal,newGameSelected,newGameDisabled)
     newGame:registerScriptTapHandler(function()
         self:onButtonEffect()
+        newGame:setEnabled(false)
         local flare = Effect:createFlare(handler(self,self.onNewGame))
         flare:setPosition(-30, display.height-(480-297))
         flare:setVisible(true)
@@ -92,6 +93,7 @@ function MenuScene:init()
 end
 
 function MenuScene:onNewGame(psender)
+    
     app:enterScene("MainScene", nil, "fade", 1.2)
 end
 

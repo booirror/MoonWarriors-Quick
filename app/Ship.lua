@@ -1,12 +1,13 @@
 local Bullet = require("src.app.Bullet")
 local Explosion = require("src.app.Explosion")
 local GameConfig = require("src.app.GameConfig")
+local scheduler = require("src.framework.scheduler")
 
 local Ship = class("Ship", function()
     return display.newSprite("#ship01.png")
 end)
 
-function Ship:ctor()
+function Ship:ctor(parent)
     self.speed = 220
     self.bulletSpeed = GameConfig.bulletSpeed.ship
     self.hp = 5
@@ -23,33 +24,32 @@ function Ship:ctor()
     self.bornSprite = nil
     self.timeTick = 0
     
-    self.setTag(self.zOrder)
-    self.setPosition(self.appearPosition)
-    
+    self:setPosition(self.appearPosition)
+    parent:addChild(self, self.zOrder, GameConfig.unitTag.player)
     local frames = display.newFrames("ship%02d.png", 1, 2)
     local animation = display.newAnimation(frames,0.1)
     local animate = cc.Animate:create(animation)
     self:runAction(cc.RepeatForever:create(animate))
-    self:shedule(handler(self, self.shoot), 1/6)
     
     self:initBornSprite()
     self:born()
-    
+    self:setBlendFunc(gl.SRC_ALPHA, gl.ONE)
 end
 
 function Ship:shoot(dt)
     local offset = 13
     local x, y = self:getPosition()
     local cs = self:getContentSize()
-    local b = Bullet:showByShip(function.args)
+    local b = Bullet:showByShip(self:getParent())
     b:setPosition(x+offset, y + 3 + cs.height*0.3)
-    local b = Bullet:showByShip(function.args)
+    local b = Bullet:showByShip(self:getParent())
     b:setPosition(x-offset, y + 3 + cs.height*0.3)
 end
 
 function Ship:destroy()
     GameConfig.life = GameConfig.life - 1
-    local explosion = Explosion:show(function.args)
+    scheduler.unscheduleGlobal(self.schedluer)
+    local explosion = Explosion:show(self:getParent():getParent())
     explosion:setPosition(self:getPosition())
     if (GameConfig.sound) then
         audio.playSound(res.mp3_shipDestroyEffect)
@@ -63,7 +63,22 @@ function Ship:hurt()
     end
 end
 
-function Ship:collideRect(x, y)
+function Ship:update(dt)
+    if self.hp <= 0 then
+        self.active = false
+        self:destroy()
+    end
+    self.timeTick = self.timeTick + dt
+    if self.timeTick > 0.1 then
+        self.timeTick = 0
+        if self.hurtColorLife > 0 then
+            self.hurtColorLife = self.hurtColorLife - 1
+        end
+    end
+end
+
+function Ship:collideRect()
+    local x, y = self:getPosition()
     local a = self:getContentSize()
     return cc.rect(x - a.width/2,y - a.height/2,a.width,a.height/2)
 end
@@ -91,6 +106,7 @@ function Ship:born()
     self.hp = 5
     self.hurtColorLife = 0
     self.active = true
+    self.schedluer = scheduler.scheduleGlobal(handler(self, self.shoot), 1/6)
 end
 
 return Ship

@@ -16,7 +16,8 @@ function Bullet:ctor(speed, type, mode)
     self.parentType = GameConfig.bulletType.player
     self.vY = -speed
     self.attackMode = mode
-    self:setDisplayFrame(display.newSpriteFrame(type))
+    self:setSpriteFrame(display.newSpriteFrame(type))
+    self:setBlendFunc(gl.SRC_ALPHA, gl.ONE)
 end
 
 function Bullet:update(dt)
@@ -46,14 +47,15 @@ function Bullet:destroy()
     self:setVisible(false)
 end
 
-function Bullet:collideRect(x, y)
+function Bullet:collideRect()
+    local x, y = self:getPosition()
     return cc.rect(x-3, y-3, 6, 6)
 end
 
 function Bullet:activate()
     self.active = true
     self.hp = 1
-    self.setVisible(true)
+    self:setVisible(true)
 end
 
 function Bullet:findAvailable(mode)
@@ -88,18 +90,18 @@ function Bullet:show(parent, speed, type, attackMode, zorder, mode)
     return bullet
 end
 
-function Bullet:showByShip()
-    self:show(parent, GameConfig.bulletSpeed.ship, "W1.png", GameConfig.enemyAttackMode.normal, 3000, GameConfig.unitTag.playerBullet)
+function Bullet:showByShip(parent)
+    return self:show(parent, GameConfig.bulletSpeed.ship, "W1.png", GameConfig.enemyAttackMode.normal, 3000, GameConfig.unitTag.playerBullet)
 end
 
-function Bullet:showByEnemy()
-    self:show(parent, GameConfig.bulletSpeed.ship, "W2.png", GameConfig.enemyAttackMode.normal, 3000, GameConfig.unitTag.enemyBullet)
+function Bullet:showByEnemy(parent)
+    return self:show(parent, GameConfig.bulletSpeed.enemy, "W2.png", GameConfig.enemyAttackMode.normal, 3000, GameConfig.unitTag.enemyBullet)
 end
 
 function Bullet:create(parent, speed, type, attackMode, zorder, mode)
     local b = self.new(speed, type, attackMode)
     b:activate()
-    assert(false, "add child")
+    parent:getParent():addBullet(b, zorder, mode)
     if mode == GameConfig.unitTag.playerBullet then
         table.insert(GameConfig.container.playerBullets,b)
     else

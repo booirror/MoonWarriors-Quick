@@ -2,7 +2,6 @@ local Effect = {}
 
 function Effect:createFlare(callback)
     local flare = cc.Sprite:create(res.jpg_fire)
-    local blendFunc =
     flare:setBlendFunc(gl.SRC_ALPHA, gl.ONE)
     flare:setOpacity(0)
     flare:setRotation(-120)
@@ -20,13 +19,14 @@ function Effect:createFlare(callback)
     
     local onComplete = cc.CallFunc:create(callback)
     local killflare = cc.CallFunc:create(function()
-        flare:getParent():removeChild(self, true)
+        flare:removeFromParent()
     end)
     
     flare:runAction(cc.Sequence:create({opacityAnim, biggerEase, opacDim, killflare, onComplete})) 
     flare:runAction(easeMove)
     flare:runAction(rotateEase)
     flare:runAction(bigger)
+    return flare
 end
 
 return Effect

@@ -1,6 +1,4 @@
-local SparkEffect = class("SparkEffect", function()
-    return display.newNode()
-end)
+local SparkEffect = class("SparkEffect")
 
 local GameConfig = require("src.app.GameConfig")
 
@@ -11,8 +9,8 @@ function SparkEffect:ctor()
     
     self.spark1 = display.newSprite("#explode2.png")
     self.spark2 = display.newSprite("#explode3.png")
-    self:addChild(self.spark1)
-    self:addChild(self.spark2)
+    self.spark1:setBlendFunc(gl.SRC_ALPHA, gl.ONE)
+    self.spark2:setBlendFunc(gl.SRC_ALPHA, gl.ONE)
 end
 
 function SparkEffect:play(x, y)
@@ -23,9 +21,13 @@ function SparkEffect:play(x, y)
     self.spark2:setScale(self.scale)
     
     self.spark2:setRotation(math.random()*360)
+    self.spark1:setOpacity(255)
+    self.spark2:setOpacity(255)
+    
     local right = cc.RotateBy:create(self.duration, 45)
     local scaleby = cc.ScaleBy:create(self.duration, 3, 3)
-    local seq = cc.Sequence:create({right, scaleby})
+    local call = cc.CallFunc:create(handler(self, self.destroy))
+    local seq = cc.Sequence:create({cc.FadeOut:create(self.duration), call})
     self.spark1:runAction(right)
     self.spark1:runAction(scaleby)
     self.spark1:runAction(seq)
@@ -54,7 +56,7 @@ function SparkEffect:show(parent, x, y)
         spark = self:create(parent)
     end
     spark:activate()
-    spark.play(x, y)
+    spark:play(x, y)
     return spark
 end
 
@@ -72,7 +74,8 @@ end
 
 function SparkEffect:create(parent)
     local spark = self.new()
-    parent:addChild(spark, GameConfig.order_spark)
+    parent:addSpark(spark.spark1)
+    parent:addSpark(spark.spark2)
     table.insert(GameConfig.container.sparks, spark)
     return spark
 end

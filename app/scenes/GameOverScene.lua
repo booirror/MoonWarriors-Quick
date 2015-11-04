@@ -2,7 +2,7 @@ local GameOverScene = class("GameOverScene", function()
     return display.newScene("GameOverScene")
 end)
 
-local GameConfig = require("app.GameConfig")
+local GameConfig = require("src.app.GameConfig")
 local Effect = require("app.Effect")
 
 function GameOverScene:ctor()
@@ -18,7 +18,7 @@ function GameOverScene:init()
     flare:setVisible(false)
     self:addChild(flare)
     
-    local logo = display.newSprite(res.png_logo)
+    local logo = display.newSprite(res.png_gameover)
     logo:setPosition(0, display.height-180)
     logo:setAnchorPoint(0, 0)
     self:addChild(logo, 10, 1)
@@ -27,11 +27,12 @@ function GameOverScene:init()
     lbscore:setString(""..GameConfig.score)
     lbscore:setSystemFontSize(30)
     lbscore:setColor(cc.c3b(250, 179, 0))
+    lbscore:setPosition(160, display.height-200)
     self:addChild(lbscore, 10)
     
-    local playAgainNormal = cc.Sprite:create(res.menu_png, cc.rect(378, 0, 126, 33))
-    local playAgainSelected = cc.Sprite:create(res.menu_png, cc.rect(378, 33, 126, 33))
-    local playAgainDisabled = cc.Sprite:create(res.menu_png, cc.rect(378, 33 * 2, 126, 33))
+    local playAgainNormal = cc.Sprite:create(res.png_menu, cc.rect(378, 0, 126, 33))
+    local playAgainSelected = cc.Sprite:create(res.png_menu, cc.rect(378, 33, 126, 33))
+    local playAgainDisabled = cc.Sprite:create(res.png_menu, cc.rect(378, 33 * 2, 126, 33))
     
     local play = cc.MenuItemSprite:create(playAgainNormal,playAgainSelected, playAgainDisabled)
     play:registerScriptTapHandler(function()
@@ -41,12 +42,14 @@ function GameOverScene:init()
         self:addChild(flare)
         app:enterScene("MainScene", nil, "fade", 1.2)
     end)
+    play:setPosition(display.cx, display.height-260)
     local menu = cc.Menu:create()
+    menu:setPosition(0,0)
     menu:addChild(play)
     self:addChild(menu, 1, 2)
     
     local coco = display.newSprite(res.quick_png)
-    coco:setPosition(160, display.height)
+    coco:setPosition(160, display.height-330)
     self:addChild(coco, 10)
     
     if GameConfig.sound then
@@ -54,6 +57,8 @@ function GameOverScene:init()
     end
 end
 
-
+function GameOverScene:onNewGame(pSender)
+    app:enterScene("MainScene", nil, "fade", 1.2)
+end
 
 return GameOverScene

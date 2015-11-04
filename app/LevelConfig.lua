@@ -1,15 +1,19 @@
-Level1 = {
+local LevelConfig = {}
+
+LevelConfig.Level1 = {
     enemyMax = 6,
-    enemies {
+    enemies = {
         {
             showType = "Repeate",
             showTime = "00:02",
-            types = {0,1,2}
+            types = {1,2,3}
         },
         {
             showType = "Repeate",
             showTime = "00:05",
-            types = {3, 4, 5}
+            types = {4, 5, 6}
         }
     }
 }
+
+return LevelConfig

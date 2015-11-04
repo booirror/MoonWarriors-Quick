@@ -6,22 +6,22 @@ local GameConfig = require("src.app.GameConfig")
 
 function BackSky:ctor()
     self.active = true
-    self:setAnchorPont(0, 0)
+    self:setAnchorPoint(0, 0)
 end
 
 function BackSky:destroy()
-    self.setVisible(false)
+    self:setVisible(false)
     self.active = false
 end
 
 function BackSky:activate()
-    self.setVisible(true)
+    self:setVisible(true)
     self.active = true
 end
 
 function BackSky:create(parent)
     local bg = self.new()
-    assert(false, "add child")
+    parent:addChild(bg, -11)
     table.insert(GameConfig.container.backSkys, bg)
     return bg
 end
@@ -30,7 +30,7 @@ function BackSky:getAvailable()
     local bs = nil
     local skys = GameConfig.container.backSkys
     
-    for i = 0, #skys do
+    for i = 1, #skys do
         bs = skys[i]
         if bs.active == false then
             return bs
@@ -69,7 +69,7 @@ end)
 
 function BackTileMap:ctor(frameName)
     self.active = true
-    self:setDisplayFrame(display.newSpriteFrame(frameName))
+    self:setSpriteFrame(display.newSpriteFrame(frameName))
     self:setAnchorPoint(0.5, 0)
 end
 
@@ -85,7 +85,7 @@ end
 
 function BackTileMap:create(parent, frameName)
     local back = BackTileMap.new(frameName)
-    assert(false, "add Child")
+    parent:addChild(back, -10)
     table.insert(GameConfig.container.backitlemaps, back)
     return back
 end
@@ -104,7 +104,7 @@ end
 function BackTileMap:show(parent)
     local tile = self:getAvailable()
     if tile == nil then
-        tile = self:create(parent,tileMapLv[math.random()*4+1])
+        tile = self:create(parent,tileMapLv[math.floor(math.random()*4)+1])
     end
     tile:activate()
     return tile
@@ -113,7 +113,7 @@ end
 function BackTileMap:preLoad(parent)
     local backTileMap = nil
     for i = 1, #tileMapLv do
-        backTileMap = BackTileMap.create(tileMapLv[i])
+        backTileMap = BackTileMap:create(tileMapLv[i])
         backTileMap:setVisible(false)
         backTileMap.active = false
     end

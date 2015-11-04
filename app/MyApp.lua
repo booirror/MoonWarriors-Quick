@@ -14,6 +14,7 @@ function MyApp:run()
     cc.FileUtils:getInstance():addSearchPath("res/ImageRaw/")
     cc.FileUtils:getInstance():addSearchPath("res/Music/")
     self:enterScene("MenuScene")
+    cc.Director:getInstance():setDisplayStats(false)
 end
 
 return MyApp

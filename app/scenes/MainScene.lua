@@ -58,7 +58,7 @@ function MainScene:resetData()
     GameConfig.container.backitlemaps = {}
     GameConfig.activeEnemies = 0
     GameConfig.score = 0
-    GameConfig.life = 0
+    GameConfig.life = 10
 end
 
 function MainScene:init()
@@ -75,9 +75,11 @@ function MainScene:init()
     self.layer:setTouchEnabled(true)
     
     self.texOpaqueBatch = display.newBatchNode(res.textureOpaquePack_png)
+    self.texOpaqueBatch:setBlendFunc(gl.SRC_ALPHA, gl.ONE)
     self:addChild(self.texOpaqueBatch)
     
     self.texTransparentBatch = display.newBatchNode(res.textureTransparentPack_png)
+    --self.texTransparentBatch:setBlendFunc(gl.SRC_ALPHA, gl.ONE)
     self:addChild(self.texTransparentBatch)
     
     self.levelManager = LevelManager.new(self)
@@ -94,6 +96,7 @@ function MainScene:init()
     self.texTransparentBatch:addChild(life, 1, 5)
     
     self.lbLife = cc.Label:create()
+    self.lbLife:setPosition(60, display.height - 22)
     self.lbLife:setString("0")
     self.lbLife:setSystemFontSize(20)
     self.lbLife:setColor(cc.c3b(255,0,0))
@@ -106,6 +109,7 @@ function MainScene:init()
     self:setTag(GameConfig.unitTag.player)
 
     self.explosions = display.newBatchNode(res.explosion_png)
+    self.explosions:setBlendFunc(gl.SRC_ALPHA, gl.ONE)
     self:addChild(self.explosions)
     
     Explosion:sharedExplosion()
@@ -119,22 +123,21 @@ function MainScene:init()
     label:setString("Main Menu")
     label:setSystemFontSize(18)
     local sysMenuItem = cc.MenuItemLabel:create(label)
-    sysMenuItem:registerScriptHandler(handler(self, self.onSysMenu))
+    sysMenuItem:registerScriptTapHandler(handler(self, self.onSysMenu))
     sysMenuItem:setAnchorPoint(0, 0)
     sysMenuItem:setPosition(display.width-95, 5)
     local menu = cc.Menu:create()
     menu:setPosition(0,0)
     menu:addChild(sysMenuItem)
     self:addChild(menu, 1, 2)
-    
-    self:addNodeEventListener(cc.NODE_ENTER_FRAME_EVENT, handler(self, self.update))
     self:scheduleUpdate()
-    self.scoreTimer = scheduler.scheduleGlobal(hander(self, self.scoreCounter), 1)
+    self:addNodeEventListener(cc.NODE_ENTER_FRAME_EVENT, handler(self, self.update))
+    self.scoreTimer = scheduler.scheduleGlobal(handler(self, self.scoreCounter), 1)
     self.moveTimer = scheduler.scheduleGlobal(handler(self, self.moveTileMap), 5)
 end
 
 function MainScene:onSysMenu(sender)
-    app.enterScene("SysMenuScene", nil, "fade", 1.2)
+    app:enterScene("MenuScene", nil, "fade", 1.2)
 end
 
 function MainScene:scoreCounter()
@@ -160,7 +163,7 @@ end
 
 function MainScene:update(dt)
     if self.state == state.playing then
-        self.checkCollision()
+        self:checkCollision()
         self:removeInactiveUnit(dt)
         self:checkReBorn()
         self:updateUI()
@@ -175,7 +178,7 @@ function MainScene:checkCollision()
         local e = enemies[i]
         if e.active then
             for j =1, #bullets do
-                local b = #bullets[j]
+                local b = bullets[j]
                 if b.active and self:collide(e, b) then
                     b:hurt()
                     e:hurt()
@@ -184,14 +187,14 @@ function MainScene:checkCollision()
             if self:collide(e, self.ship) then
                 if self.ship.active then
                     self.ship:hurt()
-                    e.hurt()
+                    e:hurt()
                 end
             end
         end
     end
     for i = 1, #GameConfig.container.enemyBullets do
         local eb = GameConfig.container.enemyBullets[i]
-        if eb.active and self.collide(eb, self.ship) then
+        if eb.active and self:collide(eb, self.ship) then
             if self.ship.active then
                 self.ship:hurt()
                 eb:hurt()
@@ -213,7 +216,7 @@ function MainScene:removeInactiveUnit(dt)
     updateChildren(self.texTransparentBatch:getChildren())
 end
 
-function MainScene:checkReborn()
+function MainScene:checkReBorn()
     local ship = self.ship
     if GameConfig.life > 0 and not ship.active then
         ship:born()
@@ -252,9 +255,9 @@ function MainScene:initBackground()
 end
 
 function MainScene:moveTileMap()
-    local backTileMap = BackTileMap:show(parent)
+    local backTileMap = BackTileMap:show(self)
     local rand = math.random()
-    backTileMap:setPosition(rand*320, display.height)
+    backTileMap:setPosition(rand*display.width, display.height)
     local move = cc.MoveBy:create(rand*2+10, cc.p(0, -display.height-240))
     local func = cc.CallFunc:create(function()
         backTileMap:destroy()
@@ -278,7 +281,7 @@ function MainScene:moveBackground(dt)
         self.backSky = BackSky:show(self)
         self.backSky:setPositionY(currY + skyHieght - 2)
     else
-        sky:setPosition(currY)
+        sky:setPositionY(currY)
         if (skyRe) then
             currY = skyRe:getPositionY() - mdt
             if (currY + skyHieght < 0) then
@@ -292,6 +295,9 @@ function MainScene:moveBackground(dt)
 end
 
 function MainScene:onGameOver()
+    self:unscheduleUpdate()
+    scheduler.unscheduleGlobal(self.moveTimer)
+    scheduler.unscheduleGlobal(self.scoreTimer)
     app:enterScene("GameOverScene", nil, "fade", 1.2)
 end
 
@@ -304,7 +310,7 @@ function MainScene:addExplosions(e)
 end
 
 function MainScene:addBulletHits(hit, z)
-    self.texTransparentBatch:addChild(hit, z)
+    self.texOpaqueBatch:addChild(hit, z)
 end
 
 function MainScene:addSpark(sp)

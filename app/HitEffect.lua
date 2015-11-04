@@ -6,12 +6,14 @@ local GameConfig = require("src.app.GameConfig")
 
 function HitEffect:ctor()
     self.active = true
+    self:setBlendFunc(gl.SRC_ALPHA, gl.ONE)
 end
 
 function HitEffect:play(x, y, roatation, scale)
     self:setPosition(x, y)
     self:setRotation(roatation)
     self:setScale(scale)
+    self:setOpacity(255)
     self:runAction(cc.ScaleBy:create(0.3, 2, 2))
     local fout = cc.FadeOut:create(0.3)
     local call = cc.CallFunc:create(handler(self, self.destroy))
@@ -42,7 +44,7 @@ end
 
 function HitEffect:create(parent)
     local effect = self.new()
-    parent:addChild(effect, GameConfig.order_effect)
+    parent:getParent():addBulletHits(effect, GameConfig.order_effect)
     table.insert(GameConfig.container.hits, effect)
     return effect
 end
